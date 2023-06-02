@@ -26,7 +26,7 @@ const categoryController = {
                 res.status(500).json(err)
             })
     },
-    add: (req, res) => {
+    add: (req,res) => {
         var category = new Category({
             name: req.body.name,
             description: req.body.description

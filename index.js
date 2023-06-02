@@ -6,7 +6,6 @@ const categoryRoutes = require('./routes/categoryRoutes');
 
 
 
-
 db.connect();
 
 app.use(express.json());
