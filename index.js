@@ -3,6 +3,7 @@ const app = express();
 const { db } = require('./config/db');
 
 const categoryRoutes = require('./routes/categoryRoutes');
+const { Book } = require('./models/Books');
 
 
 
@@ -12,10 +13,20 @@ app.use(express.json());
 
 
 
-app.use("/api/categories",categoryRoutes);
+app.use("/api/categories", categoryRoutes);
 
 
 
 app.listen(8080, () => {
     console.log('Server is running...');
 })
+
+
+
+
+
+Book.find().populate('writers')
+    .exec()
+    .then(data => {
+        console.log('DATA', data);
+    })
