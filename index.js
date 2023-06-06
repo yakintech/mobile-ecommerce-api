@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const { db } = require('./config/db');
 var jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 
 const categoryRoutes = require('./routes/categoryRoutes');
@@ -11,14 +12,14 @@ db.connect();
 app.use(express.json());
 
 let privateKey = "gojira"
-
-let expireDate = 10
+const saltRounds = 10;
+let expireDate = 300
 
 app.use((req, res, next) => {
 
 
     // token a gelmek isterse de next diyorum. Çünkü public page
-    if (req.url == "/token") {
+    if (req.url === "/token" || req.url === '/register') {
         next();
     }
     else {
@@ -59,26 +60,56 @@ app.use("/api/categories", categoryRoutes);
 
 app.post('/token', (req, res) => {
 
-    User.findOne({ email: req.body.email, password: req.body.password })
-        .then(data => {
-            if (data) {
 
-                //user varsa token generate edeceğim
-                let token = jwt.sign({email: req.body.email}, privateKey,{
-                    algorithm: 'HS256',
-                    expiresIn: expireDate
+    User.findOne({ email: req.body.email })
+        .then(data => {
+            bcrypt.compare(req.body.password, data.password, function (err, result) {
+
+                if (result) {
+                    let token = jwt.sign({ email: req.body.email }, privateKey, {
+                        algorithm: 'HS256',
+                        expiresIn: expireDate,
+                        issuer: 'iron maiden ın tokenı'
+                    })
+                    res.json({ "token": token })
+                }
+                else {
+                    res.status(401).json({ "message": "Access denied" })
+
+                }
+
+            });
+
+        })
+
+})
+
+
+app.post('/register', (req, res) => {
+
+
+    bcrypt.genSalt(saltRounds, function (err, salt) {
+
+        bcrypt.hash(req.body.password, salt, function (err, hash) {
+
+            const user = new User({
+                email: req.body.email,
+                password: hash
+            })
+
+            user.save()
+                .then(data => {
+                    res.json(data)
+                })
+                .catch(err => {
+                    res.status(500).json(err)
                 })
 
+        });
 
-                res.json({ "token": token })
-            }
-            else {
-                res.status(401).json({ "message": "Access denied" })
-            }
-        })
-        .catch(err => {
-            res.status(500).json(err)
-        })
+    });
+
+
 
 })
 
