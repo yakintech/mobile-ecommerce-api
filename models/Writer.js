@@ -5,10 +5,9 @@ const WriterSchema = new mongoose.Schema({
     firstName:String,
     surname:String,
     birthDate: Date,
-    books:[{ type: mongoose.Schema.Types.ObjectId, ref: 'book' }]
+    books:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }]
 
 })
-
 
 const Writer = mongoose.model('Writer', WriterSchema);
 
